@@ -9,22 +9,22 @@ import (
 const configFileName = ".gatorconfig.json"
 
 var homePath string
+var configPath string
 
-func InitHomePath(mainWd string) {
+func InitPaths(mainWd string) {
 	if homePath == "" {
 		homePath = mainWd
 	}
+
+	configPath = homePath + "/" + configFileName
 }
 
 func Read() (Config, error) {
 	var configData Config
 
-	configPath := getConfigPath()
-
-	fmt.Println(configPath)
+	// fmt.Println(configPath)
 
 	fileContent, err := os.ReadFile(configPath)
-
 	if err != nil {
 		return configData, fmt.Errorf("Error reading file content: %v\n", err)
 	}
@@ -38,9 +38,30 @@ func Read() (Config, error) {
 
 }
 
-func getConfigPath() string {
-	configPath := homePath + "/" + configFileName
-	return configPath
+// func getConfigPath() string {
+// 	configPath := homePath + "/" + configFileName
+// 	return configPath
+// }
+
+func write(cfg Config) error {
+	// configPath := getConfigPath()
+
+	jsonData, err := json.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("Error encoding Config to json: %v", err)
+	}
+
+	err = os.WriteFile(configPath, jsonData, 0644)
+	if err != nil {
+		return fmt.Errorf("Error writing to file: %v", err)
+	}
+
+	return nil
+
 }
 
-// func SetUser(homePath string)
+func (c Config) SetUser(username string) error {
+	c.Current_user_name = username
+	err := write(c)
+	return err
+}

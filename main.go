@@ -13,11 +13,19 @@ func main() {
 		fmt.Println(err)
 	}
 
-	config.InitHomePath(homePath)
+	config.InitPaths(homePath)
 
-	test, err := config.Read()
+	cfg, err := config.Read()
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("%#v", test)
+
+	cfg.SetUser("james")
+
+	cfg, err = config.Read()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("%#v", cfg)
 }
