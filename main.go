@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	config "github.com/cardvark/blog-aggregator/internal/config"
+	"github.com/cardvark/blog-aggregator/internal/config"
 )
 
 func main() {
@@ -13,7 +13,9 @@ func main() {
 		fmt.Println(err)
 	}
 
-	test, err := config.Read(homePath)
+	config.InitHomePath(homePath)
+
+	test, err := config.Read()
 	if err != nil {
 		fmt.Println(err)
 	}
