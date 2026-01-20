@@ -1,11 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/cardvark/blog-aggregator/internal/command"
 	"github.com/cardvark/blog-aggregator/internal/config"
+	"github.com/cardvark/blog-aggregator/internal/database"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -28,7 +32,14 @@ func main() {
 		fmt.Println(err)
 	}
 
-	cfgState := command.GetState(cfg)
+	db, err := sql.Open("postgres", cfg.DB_url)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	dbQueries := database.New(db)
+
+	cfgState := command.GetState(cfg, dbQueries)
 
 	cmdName := args[1]
 	var cmdArgs []string
