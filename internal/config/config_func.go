@@ -13,7 +13,13 @@ var configPath string
 
 func InitPaths(mainWd string) {
 	if homePath == "" {
-		homePath = mainWd
+		// homePath = mainWd
+		newPath, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		homePath = newPath
 	}
 
 	configPath = homePath + "/" + configFileName
