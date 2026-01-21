@@ -13,6 +13,57 @@ import (
 	"github.com/google/uuid"
 )
 
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		fmt.Println("Error: feed (1) name and (2) URL required.")
+		os.Exit(1)
+		return fmt.Errorf("Error: no arguments found for %s:\n", cmd.name)
+	}
+
+	feedName := cmd.args[0]
+	feedURL := cmd.args[1]
+
+	userName := s.config.Current_user_name
+
+	user, err := s.db.GetUser(
+		context.Background(),
+		userName,
+	)
+	if err != nil {
+		fmt.Println("Current user not found in database.")
+		os.Exit(1)
+		return err
+	}
+
+	user_id := user.ID
+
+	now := time.Now()
+	var nullableTime sql.NullTime
+	nullableTime.Time = now
+	nullableTime.Valid = true
+
+	feedParams := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: nullableTime,
+		Name:      feedName,
+		Url:       feedURL,
+		UserID:    user_id,
+	}
+
+	feed, err := s.db.CreateFeed(
+		context.Background(),
+		feedParams,
+	)
+	if err != nil {
+		fmt.Printf("Error creating feed entry: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("%#", feed)
+	return nil
+}
+
 func handlerAgg(s *state, cmd command) error {
 
 	feedURL := "https://www.wagslane.dev/index.xml"
@@ -164,6 +215,7 @@ func GetCommands() commands {
 	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerUsers)
 	cmds.register("agg", handlerAgg)
+	cmds.register("addfeed", handlerAddFeed)
 
 	return cmds
 }
