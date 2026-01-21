@@ -11,3 +11,8 @@ VALUES (
 )
 RETURNING *
 ;
+
+-- name: GetFeeds :many
+select * from feeds
+order by name asc
+;

@@ -21,3 +21,7 @@ delete from users
 select * from users
 order by name asc
 ;
+
+-- name: GetUserByID :one
+select * from users where id = $1
+;
