@@ -12,6 +12,23 @@ import (
 	"github.com/google/uuid"
 )
 
+func handlerReset(s *state, cmd command) error {
+	err := s.db.DeleteUsers(
+		context.Background(),
+	)
+
+	if err != nil {
+		fmt.Printf("Error deleting users: %v\n", err)
+		os.Exit(1)
+		return err
+	}
+
+	fmt.Println("Deleted all users from 'users' table.")
+
+	return nil
+
+}
+
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
 		fmt.Println("Error: username required")
@@ -110,6 +127,10 @@ func GetCommands() commands {
 	cmds.register(
 		"register",
 		handlerRegister,
+	)
+	cmds.register(
+		"reset",
+		handlerReset,
 	)
 
 	return cmds
