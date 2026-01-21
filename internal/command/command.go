@@ -9,8 +9,26 @@ import (
 
 	"github.com/cardvark/blog-aggregator/internal/config"
 	"github.com/cardvark/blog-aggregator/internal/database"
+	"github.com/cardvark/blog-aggregator/internal/rss"
 	"github.com/google/uuid"
 )
+
+func handlerAgg(s *state, cmd command) error {
+
+	feedURL := "https://www.wagslane.dev/index.xml"
+
+	rssFeed, err := rss.FetchFeed(
+		context.Background(),
+		feedURL,
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(rssFeed)
+
+	return nil
+}
 
 func handlerUsers(s *state, cmd command) error {
 	users, err := s.db.GetUsers(
@@ -141,22 +159,11 @@ func GetCommands() commands {
 		commandMap: make(map[string]func(*state, command) error),
 	}
 
-	cmds.register(
-		"login",
-		handlerLogin,
-	)
-	cmds.register(
-		"register",
-		handlerRegister,
-	)
-	cmds.register(
-		"reset",
-		handlerReset,
-	)
-	cmds.register(
-		"users",
-		handlerUsers,
-	)
+	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
+	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerUsers)
+	cmds.register("agg", handlerAgg)
 
 	return cmds
 }
