@@ -12,6 +12,27 @@ import (
 	"github.com/google/uuid"
 )
 
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(
+		context.Background(),
+	)
+	if err != nil {
+		fmt.Printf("Error retrieving users: %v", err)
+		os.Exit(1)
+		return err
+	}
+
+	for _, user := range users {
+		if s.config.Current_user_name == user.Name {
+			fmt.Printf("* %s (current)\n", user.Name)
+		} else {
+			fmt.Printf("* %s\n", user.Name)
+		}
+	}
+
+	return nil
+}
+
 func handlerReset(s *state, cmd command) error {
 	err := s.db.DeleteUsers(
 		context.Background(),
@@ -131,6 +152,10 @@ func GetCommands() commands {
 	cmds.register(
 		"reset",
 		handlerReset,
+	)
+	cmds.register(
+		"users",
+		handlerUsers,
 	)
 
 	return cmds
