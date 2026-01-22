@@ -11,6 +11,29 @@ import (
 	"github.com/google/uuid"
 )
 
+func handlerFollowing(s *state, cmd command) error {
+	user, err := getCurrentUser(s)
+	if err != nil {
+		return err
+	}
+
+	feedFollows, err := s.db.GetFeedFollowsForUser(
+		context.Background(),
+		user.ID,
+	)
+	if err != nil {
+		fmt.Printf("Error retrieving feed follows for user: %v\n", err)
+		return err
+	}
+	fmt.Println(feedFollows)
+
+	fmt.Printf("Current user %s is following:\n", user.Name)
+	for _, feedFollow := range feedFollows {
+		fmt.Printf("- %v\n", feedFollow.FeedName)
+	}
+	return nil
+}
+
 func handlerFollow(s *state, cmd command) error {
 	if len(cmd.args) < 1 {
 		fmt.Println("Error: URL required.")

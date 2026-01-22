@@ -11,6 +11,23 @@ import (
 	"github.com/google/uuid"
 )
 
+func getCurrentUser(s *state) (database.User, error) {
+	user := database.User{}
+	userName := s.config.Current_user_name
+
+	user, err := s.db.GetUser(
+		context.Background(),
+		userName,
+	)
+	if err != nil {
+		fmt.Println("Current user not found in database.")
+		os.Exit(1)
+		return user, err
+	}
+
+	return user, nil
+}
+
 func handlerUsers(s *state, cmd command) error {
 	users, err := s.db.GetUsers(
 		context.Background(),
