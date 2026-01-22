@@ -59,6 +59,16 @@ func handlerAddFeed(s *state, cmd command) error {
 		return err
 	}
 
+	tempCmd := command{
+		args: []string{feedURL},
+	}
+
+	err = handlerFollow(s, tempCmd)
+	if err != nil {
+		fmt.Println("Error following new feed: ", err)
+		return err
+	}
+
 	fmt.Printf("%#v", feed)
 	return nil
 }
