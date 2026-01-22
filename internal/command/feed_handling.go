@@ -59,7 +59,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		return err
 	}
 
-	fmt.Printf("%#", feed)
+	fmt.Printf("%#v", feed)
 	return nil
 }
 
