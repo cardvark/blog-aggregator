@@ -12,6 +12,12 @@ VALUES (
 RETURNING *
 ;
 
+-- name: GetFeedByURL :one
+select * 
+from feeds 
+where url = $1
+;
+
 -- name: GetFeeds :many
 select * from feeds
 order by name asc
