@@ -11,6 +11,40 @@ import (
 	"github.com/google/uuid"
 )
 
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.args) < 1 {
+		fmt.Println("Error: URL required.")
+		os.Exit(1)
+		return fmt.Errorf("Error: no arguments found for %s:\n", cmd.name)
+	}
+
+	feedURL := cmd.args[0]
+
+	feed, err := s.db.GetFeedByURL(
+		context.Background(),
+		feedURL,
+	)
+	if err != nil {
+		fmt.Printf("Error retrieving feed by url: %v\n", err)
+		return err
+	}
+	removeFollowParams := database.RemoveFeedFollowForUserParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+
+	err = s.db.RemoveFeedFollowForUser(
+		context.Background(),
+		removeFollowParams,
+	)
+	if err != nil {
+		fmt.Printf("Error removing feed follow from db: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
 func handlerFollowing(s *state, cmd command, user database.User) error {
 	feedFollows, err := s.db.GetFeedFollowsForUser(
 		context.Background(),
@@ -29,7 +63,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 1 {
 		fmt.Println("Error: URL required.")
 		os.Exit(1)
@@ -85,8 +119,7 @@ func handlerFollow(s *state, cmd command) error {
 	}
 
 	fmt.Printf("%v\n", feedFollow)
-	fmt.Printf("%s is now following feed: %s.\n", userName, feedFollow.FeedName)
+	fmt.Printf("%s is now following feed: %s.\n", user.Name, feedFollow.FeedName)
 
 	return nil
-
 }

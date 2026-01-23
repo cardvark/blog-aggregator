@@ -34,3 +34,8 @@ join users fc on f.user_id = fc.id
 where ff.user_id = $1
 order by f.name asc
 ;
+
+-- name: RemoveFeedFollowForUser :exec
+delete from feed_follows
+where user_id = $1 and feed_id = $2
+;
