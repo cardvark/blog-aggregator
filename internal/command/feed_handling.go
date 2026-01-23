@@ -47,13 +47,8 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	tempCmd := command{
-		args: []string{feedURL},
-	}
-
-	err = handlerFollow(s, tempCmd)
+	err = executeFollow(s, feedURL, user)
 	if err != nil {
-		fmt.Println("Error following new feed: ", err)
 		return err
 	}
 

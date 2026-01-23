@@ -72,24 +72,21 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 
 	feedURL := cmd.args[0]
 
+	err := executeFollow(s, feedURL, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func executeFollow(s *state, feedURL string, user database.User) error {
 	feed, err := s.db.GetFeedByURL(
 		context.Background(),
 		feedURL,
 	)
 	if err != nil {
 		fmt.Printf("Error retrieving feed by url: %v\n", err)
-		return err
-	}
-
-	userName := s.config.Current_user_name
-
-	user, err := s.db.GetUser(
-		context.Background(),
-		userName,
-	)
-	if err != nil {
-		fmt.Println("Current user not found in database.")
-		os.Exit(1)
 		return err
 	}
 
