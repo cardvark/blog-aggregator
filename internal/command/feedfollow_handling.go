@@ -11,12 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFollowing(s *state, cmd command) error {
-	user, err := getCurrentUser(s)
-	if err != nil {
-		return err
-	}
-
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	feedFollows, err := s.db.GetFeedFollowsForUser(
 		context.Background(),
 		user.ID,

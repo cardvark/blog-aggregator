@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 2 {
 		fmt.Println("Error: feed (1) name and (2) URL required.")
 		os.Exit(1)
@@ -21,18 +21,6 @@ func handlerAddFeed(s *state, cmd command) error {
 
 	feedName := cmd.args[0]
 	feedURL := cmd.args[1]
-
-	userName := s.config.Current_user_name
-
-	user, err := s.db.GetUser(
-		context.Background(),
-		userName,
-	)
-	if err != nil {
-		fmt.Println("Current user not found in database.")
-		os.Exit(1)
-		return err
-	}
 
 	user_id := user.ID
 
@@ -90,7 +78,7 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFeeds(s *state, cmd command) error {
+func handlerFeeds(s *state, cmd command, user database.User) error {
 	feeds, err := s.db.GetFeeds(
 		context.Background(),
 	)
@@ -101,15 +89,6 @@ func handlerFeeds(s *state, cmd command) error {
 	}
 
 	for _, feed := range feeds {
-		user, err := s.db.GetUserByID(
-			context.Background(),
-			feed.UserID,
-		)
-		if err != nil {
-			fmt.Printf("Error retrieving user from feed user_id: %v\n", err)
-			// os.Exit(1)
-			return err
-		}
 		fmt.Printf("Feed name: %s, URL: %s, user: %s\n", feed.Name, feed.Url, user.Name)
 	}
 
