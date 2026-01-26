@@ -22,9 +22,14 @@ values (
 ;
 
 -- name: GetPostsForUser :many
-select * 
+select 
+    p.title as post_title,
+    p.description as post_description,
+    p.published_at,
+    f.name as feed_title
 from posts p
 join feed_follows ff on ff.feed_id = p.feed_id
+join feeds f on f.id = ff.feed_id
 where ff.user_id = $1
 order by published_at desc
 limit $2

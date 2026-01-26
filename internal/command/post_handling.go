@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,4 +66,45 @@ func savePost(s *state, feedID uuid.UUID, rssItem rss.RSSItem) error {
 	}
 
 	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	resultLimit := 2
+	var resp string
+
+	if len(cmd.args) >= 1 {
+		resp = cmd.args[0]
+	}
+
+	resultLimit, err := strconv.Atoi(resp)
+	if err != nil {
+		fmt.Printf("Error converting input to integer. %v", err)
+		return err
+	}
+
+	getPostsParams := database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  int32(resultLimit),
+	}
+
+	posts, err := s.db.GetPostsForUser(
+		context.Background(),
+		getPostsParams,
+	)
+	if err != nil {
+		fmt.Printf("Error retrieving posts for user: %v", err)
+		return err
+	}
+
+	fmt.Printf("Retrieving most recent %v posts:\n\n", resultLimit)
+
+	for _, post := range posts {
+		fmt.Println("From Feed:", post.FeedTitle)
+		fmt.Println(post.PostTitle)
+		fmt.Println(post.PostDescription.String)
+		fmt.Printf("\n")
+	}
+
+	return nil
+
 }
