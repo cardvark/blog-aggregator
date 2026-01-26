@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -25,9 +24,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	user_id := user.ID
 
 	now := time.Now()
-	var nullableTime sql.NullTime
-	nullableTime.Time = now
-	nullableTime.Valid = true
+	nullableTime := database.GetNullTime(now)
 
 	feedParams := database.CreateFeedParams{
 		ID:        uuid.New(),
@@ -101,9 +98,7 @@ func scrapeFeeds(s *state, user database.User) error {
 	}
 
 	now := time.Now()
-	var nullableTime sql.NullTime
-	nullableTime.Time = now
-	nullableTime.Valid = true
+	nullableTime := database.GetNullTime(now)
 
 	feedFetchedParams := database.MarkFeedFetchedParams{
 		ID:        feed.ID,
@@ -121,14 +116,17 @@ func scrapeFeeds(s *state, user database.User) error {
 		return err
 	}
 
-	fmt.Println("Returning results from: ", rssFeed.Channel.Title)
+	fmt.Println("Returning results from:", rssFeed.Channel.Title)
 	fmt.Println("")
 
 	for _, item := range rssFeed.Channel.Item {
-		fmt.Println(item.Title)
+		err = savePost(s, feed.ID, item)
+		if err != nil {
+			// return err
+		}
 	}
 
-	fmt.Printf("\n\n\n")
+	fmt.Printf("\n")
 
 	return nil
 }
