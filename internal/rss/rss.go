@@ -7,6 +7,8 @@ import (
 	"html"
 	"io"
 	"net/http"
+
+	htmltomarkdown "github.com/JohannesKaufmann/html-to-markdown/v2"
 )
 
 func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
@@ -61,10 +63,33 @@ func processHTMLEscapes(rssFeed *RSSFeed) *RSSFeed {
 	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
 	rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
 
-	for _, rssItem := range rssFeed.Channel.Item {
-		rssItem.Title = html.UnescapeString(rssItem.Title)
-		rssItem.Description = html.UnescapeString(rssItem.Description)
+	for i := range rssFeed.Channel.Item {
+		titleString := rssFeed.Channel.Item[i].Title
+		titleString = html.UnescapeString(titleString)
+		descString := rssFeed.Channel.Item[i].Description
+		descString = html.UnescapeString(descString)
+
+		titleString, err := toMarkdown(titleString)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+		descString, err = toMarkdown(descString)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		rssFeed.Channel.Item[i].Title = titleString
+		rssFeed.Channel.Item[i].Description = descString
 	}
 
 	return rssFeed
+}
+
+func toMarkdown(text string) (string, error) {
+	markdown, err := htmltomarkdown.ConvertString(text)
+	if err != nil {
+		fmt.Printf("Error converting html to markdown: %v\n", err)
+		return "", err
+	}
+	return markdown, nil
 }
