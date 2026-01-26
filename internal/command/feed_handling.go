@@ -73,7 +73,7 @@ func handlerAgg(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func handlerFeeds(s *state, cmd command, user database.User) error {
+func handlerFeeds(s *state, cmd command) error {
 	feeds, err := s.db.GetFeeds(
 		context.Background(),
 	)
@@ -84,7 +84,12 @@ func handlerFeeds(s *state, cmd command, user database.User) error {
 	}
 
 	for _, feed := range feeds {
-		fmt.Printf("Feed name: %s, URL: %s, user: %s\n", feed.Name, feed.Url, user.Name)
+		feed_user, err := s.db.GetUserByID(context.Background(), feed.UserID)
+		if err != nil {
+			fmt.Printf("Error retrieving user name.")
+			return err
+		}
+		fmt.Printf("Feed name: %s, URL: %s, user: %s\n", feed.Name, feed.Url, feed_user.Name)
 	}
 
 	return nil

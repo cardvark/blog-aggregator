@@ -63,7 +63,7 @@ func GetCommands() commands {
 	cmds.register("users", handlerUsers)
 	cmds.register("agg", middlewareLoggedIn(handlerAgg))
 	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
-	cmds.register("feeds", middlewareLoggedIn(handlerFeeds))
+	cmds.register("feeds", handlerFeeds)
 	cmds.register("follow", middlewareLoggedIn(handlerFollow))
 	cmds.register("following", middlewareLoggedIn(handlerFollowing))
 	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollow))
