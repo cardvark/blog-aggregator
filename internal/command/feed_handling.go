@@ -56,19 +56,22 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func handlerAgg(s *state, cmd command) error {
-
-	feedURL := "https://www.wagslane.dev/index.xml"
-
-	rssFeed, err := rss.FetchFeed(
-		context.Background(),
-		feedURL,
-	)
-	if err != nil {
-		return err
+func handlerAgg(s *state, cmd command, user database.User) error {
+	if len(cmd.args) < 1 {
+		fmt.Println("Error: time between reqs required.")
+		os.Exit(1)
+		return fmt.Errorf("Error: no arguments found for %s:\n", cmd.name)
 	}
 
-	fmt.Print(rssFeed)
+	timeBetweenRequests, err := time.ParseDuration(cmd.args[0])
+	if err != nil {
+		fmt.Printf("Error parsing duration: %v\n", err)
+		return err
+	}
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s, user)
+	}
 
 	return nil
 }
@@ -86,6 +89,46 @@ func handlerFeeds(s *state, cmd command, user database.User) error {
 	for _, feed := range feeds {
 		fmt.Printf("Feed name: %s, URL: %s, user: %s\n", feed.Name, feed.Url, user.Name)
 	}
+
+	return nil
+}
+
+func scrapeFeeds(s *state, user database.User) error {
+	feed, err := s.db.GetNextFeedToFetch(context.Background(), user.ID)
+	if err != nil {
+		fmt.Printf("Error getting next feed to fetch: %v\n", err)
+		return err
+	}
+
+	now := time.Now()
+	var nullableTime sql.NullTime
+	nullableTime.Time = now
+	nullableTime.Valid = true
+
+	feedFetchedParams := database.MarkFeedFetchedParams{
+		ID:        feed.ID,
+		UpdatedAt: nullableTime,
+	}
+
+	err = s.db.MarkFeedFetched(context.Background(), feedFetchedParams)
+	if err != nil {
+		fmt.Printf("Error marking feed as fetched: %v\n", err)
+		return err
+	}
+
+	rssFeed, err := rss.FetchFeed(context.Background(), feed.Url)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Returning results from: ", rssFeed.Channel.Title)
+	fmt.Println("")
+
+	for _, item := range rssFeed.Channel.Item {
+		fmt.Println(item.Title)
+	}
+
+	fmt.Printf("\n\n\n")
 
 	return nil
 }
